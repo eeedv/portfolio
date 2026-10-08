@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Eugene</title>
+  <style>
+    @font-face {
+      font-family: 'Cyber Blast';
+      src: url('Cyber Blast.otf') format('opentype');
+      font-weight: normal;
+      font-style: normal;
+      font-display: swap;
+    }
+
+    :root {
+      color-scheme: light dark;
+      --bg: #09090b;
+      --text: #f4f4f5;
+      --text-muted: #71717a;
+      --pill-bg: rgba(255, 255, 255, 0.04);
+      --pill-border: rgba(255, 255, 255, 0.08);
+      --cursor: #6366f1;
+      --glow: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, rgba(168, 85, 247, 0.06) 50%, transparent 70%);
+    }
+
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg: #fafafa;
+        --text: #09090b;
+        --text-muted: #a1a1aa;
+        --pill-bg: rgba(0, 0, 0, 0.03);
+        --pill-border: rgba(0, 0, 0, 0.08);
+        --cursor: #4f46e5;
+        --glow: radial-gradient(circle, rgba(99, 102, 241, 0.1) 0%, rgba(147, 197, 253, 0.08) 50%, transparent 70%);
+      }
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      min-height: 100vh;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      text-align: center;
+      padding: clamp(1.25rem, 5vw, 3rem);
+      overflow-x: hidden;
+      position: relative;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      text-rendering: optimizeLegibility;
+      user-select: none;
+    }
+
+    /* Ambient background glow */
+    body::before {
+      content: "";
+      position: absolute;
+      width: min(600px, 85vw);
+      height: min(600px, 85vw);
+      border-radius: 50%;
+      background: var(--glow);
+      filter: blur(80px);
+      pointer-events: none;
+      z-index: 0;
+      animation: breathe 7s ease-in-out infinite alternate;
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      max-width: 900px;
+    }
+
+    /* Responsive Minimalist Sound Toggle Button */
+    .sound-toggle {
+      position: fixed;
+      top: clamp(14px, 3vw, 24px);
+      right: clamp(14px, 3vw, 24px);
+      z-index: 100;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 9999px;
+      background: var(--pill-bg);
+      border: 1px solid var(--pill-border);
+      color: var(--text-muted);
+      font-family: ui-monospace, SFMono-Regular, "SF Mono", monospace;
+      font-size: clamp(0.68rem, 1.8vw, 0.74rem);
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      cursor: pointer;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      transition: all 0.25s ease;
+      user-select: none;
+    }
+
+    .sound-toggle:hover {
+      color: var(--text);
+      border-color: rgba(255, 255, 255, 0.2);
+      transform: translateY(-1px);
+    }
+
+    .sound-toggle.is-active {
+      color: var(--text);
+      border-color: rgba(99, 102, 241, 0.5);
+      background: rgba(99, 102, 241, 0.1);
+      box-shadow: 0 0 16px rgba(99, 102, 241, 0.25);
+    }
+
+    /* Fluid responsive typography with letter 'g' descender clearance */
+    h1 {
+      font-family: 'Cyber Blast', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-size: clamp(2.25rem, 8vw, 4.75rem);
+      font-weight: 500;
+      letter-spacing: -0.04em;
+      line-height: 1.3;
+      min-height: 1.4em;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text);
+      word-break: break-word;
+    }
+
+    /* Smooth text shimmer with descender padding */
+    .shimmer-text {
+      display: inline-block;
+      padding-bottom: 0.2em;
+      margin-bottom: -0.2em;
+      -webkit-box-decoration-break: clone;
+      box-decoration-break: clone;
+      background: linear-gradient(
+        110deg,
+        var(--text) 25%,
+        #6366f1 50%,
+        var(--text) 75%
+      );
+      background-size: 250% 100%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: shimmer 8s linear infinite;
+    }
+
+    /* Terminal-style live cursor */
+    .cursor {
+      display: inline-block;
+      width: clamp(2px, 0.4vw, 3px);
+      height: 0.95em;
+      background-color: var(--cursor);
+      margin-left: 6px;
+      vertical-align: -0.06em;
+      border-radius: 1px;
+      box-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
+      animation: blink 0.9s steps(2, start) infinite;
+    }
+
+    .cursor.typing {
+      animation: none;
+      opacity: 1;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+
+    @keyframes shimmer {
+      0% { background-position: 250% 0; }
+      100% { background-position: -250% 0; }
+    }
+
+    @keyframes breathe {
+      0% { transform: scale(0.85); opacity: 0.45; }
+      100% { transform: scale(1.15); opacity: 0.95; }
+    }
+
+    /* ==========================================================================
+       Responsive Bryl Lim Collaborative Guide Cursor & Speech Bubble
+       ========================================================================== */
+    #guideCursor {
+      display: block;
+      position: fixed;
+      left: 0;
+      top: 0;
+      z-index: 999;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.45s ease;
+      will-change: transform;
+    }
+    #guideCursor.is-here { opacity: 1; }
+    #guideCursor.is-away { opacity: 0; }
+
+    .gc-arrow {
+      position: absolute;
+      left: -4px;
+      top: -4px;
+      width: 24px;
+      height: 24px;
+      overflow: visible;
+      filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.4));
+    }
+    .gc-arrow path { stroke-linejoin: round; }
+    .gc-rim { stroke: var(--bg); stroke-width: 6.5; }
+    .gc-body { fill: var(--text); stroke: var(--text); stroke-width: 4; }
+
+    .gc-tag {
+      position: absolute;
+      left: 0;
+      top: 0;
+      display: inline-flex;
+      flex-direction: column;
+      align-items: flex-start;
+      padding: 4px 10px 5px;
+      border-radius: 6px 15px 15px 15px;
+      background: var(--text);
+      color: var(--bg);
+      font-family: inherit;
+      white-space: nowrap;
+      box-shadow: 0 10px 24px -8px rgba(0, 0, 0, 0.5);
+      transform: translate(16px, 19px);
+      transition: transform 0.32s cubic-bezier(0.3, 1.2, 0.4, 1), border-radius 0.3s ease;
+    }
+
+    #guideCursor.is-up .gc-tag {
+      transform: translate(16px, calc(-100% - 1px));
+      border-radius: 15px 15px 15px 6px;
+    }
+    #guideCursor.is-left .gc-tag {
+      transform: translate(calc(-100% - 1px), 19px);
+      border-radius: 15px 6px 15px 15px;
+    }
+    #guideCursor.is-up.is-left .gc-tag {
+      transform: translate(calc(-100% - 1px), calc(-100% - 1px));
+      border-radius: 15px 15px 6px 15px;
+    }
+
+    .gc-name {
+      font-size: 11.5px;
+      font-weight: 600;
+      line-height: 1.5;
+      letter-spacing: 0.01em;
+      transition: opacity 0.25s ease;
+    }
+    .gc-tag.is-talking .gc-name { opacity: 0.6; }
+
+    .gc-clip {
+      width: 0;
+      height: 0;
+      overflow: hidden;
+      transition: width 0.16s cubic-bezier(0.2, 0.8, 0.2, 1), height 0.22s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+    .gc-text {
+      position: relative;
+      width: max-content;
+      max-width: min(250px, calc(100vw - 64px));
+      padding-top: 2px;
+      font-size: clamp(11.5px, 2.5vw, 13px);
+      font-weight: 500;
+      line-height: 1.4;
+      white-space: normal;
+      text-align: left;
+    }
+    .gc-measure {
+      position: absolute;
+      left: 0;
+      top: 0;
+      visibility: hidden;
+    }
+    .gc-ch {
+      opacity: 0;
+      transition: opacity 0.12s ease;
+    }
+    .gc-ch.is-on { opacity: 1; }
+
+    .gc-caret {
+      position: absolute;
+      left: 0;
+      top: 4px;
+      width: 1.5px;
+      height: 13px;
+      border-radius: 1px;
+      background: var(--bg);
+      opacity: 0;
+      transition: transform 0.07s linear, opacity 0.2s ease;
+    }
+    .gc-tag.is-typing .gc-caret { opacity: 0.9; }
+
+
+
+    /* Mobile specific fine-tuning */
+    @media (max-width: 600px) {
+      .gc-arrow {
+        transform: scale(0.85);
+        transform-origin: top left;
+      }
+      .gc-tag {
+        transform: translate(14px, 16px);
+      }
+      #guideCursor.is-up .gc-tag {
+        transform: translate(14px, calc(-100% - 1px));
+      }
+      #guideCursor.is-left .gc-tag {
+        transform: translate(calc(-100% - 1px), 16px);
+      }
+      #guideCursor.is-up.is-left .gc-tag {
+        transform: translate(calc(-100% - 1px), calc(-100% - 1px));
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Sound Toggle Control (Sound OFF by default) -->
+  <button id="soundToggle" class="sound-toggle" aria-label="Toggle Sound Effects">
+    <span id="soundIcon">🔈</span>
+    <span id="soundLabel">Sound Off</span>
+  </button>
+
+  <div class="container">
+    <h1>
+      <span id="typed-text" class="shimmer-text"></span><span class="cursor" id="cursor" aria-hidden="true"></span>
+    </h1>
+  </div>
+
+  <!-- Bryl Lim Style Guide Cursor -->
+  <div id="guideCursor" aria-hidden="true">
+    <svg class="gc-arrow" viewBox="0 0 24 24" fill="none">
+      <path class="gc-rim" d="M5.5 5.5l3.9 11.7 2.2-5.6 5.6-2.2-11.7-3.9z"/>
+      <path class="gc-body" d="M5.5 5.5l3.9 11.7 2.2-5.6 5.6-2.2-11.7-3.9z"/>
+    </svg>
+    <div class="gc-tag">
+      <span class="gc-name">Eugene</span>
+      <div class="gc-clip"><div class="gc-text" data-gc-text></div></div>
+      <div class="gc-text gc-measure" data-gc-measure></div>
+      <span class="gc-caret"></span>
+    </div>
+  </div>
+
+  <script>
+    /* ==========================================================================
+       ASMR Sound Engine (Creamy Mechanical Thocks + Binaural Spatial Panning)
+       ========================================================================== */
+    class ASMRSoundEngine {
+      constructor() {
+        this.ctx = null;
+        this.enabled = false; // DEFAULT SOUND OFF
+      }
+
+      init() {
+        if (!this.ctx) {
+          const AudioCtx = window.AudioContext || window.webkitAudioContext;
+          if (AudioCtx) this.ctx = new AudioCtx();
+        }
+        if (this.ctx && this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      }
+
+      // Binaural micro-panning (natural keyboard left vs right hand key feel)
+      getPan(char) {
+        if (!this.ctx || !this.ctx.createStereoPanner) return null;
+        const panner = this.ctx.createStereoPanner();
+        const leftKeys = 'qazwsxedcrfvtgbQAZWSXEDCRFVTGB';
+        let panVal = 0;
+        if (char && leftKeys.includes(char)) {
+          panVal = -0.32 + (Math.random() * 0.1 - 0.05);
+        } else if (char && char === ' ') {
+          panVal = 0;
+        } else {
+          panVal = 0.32 + (Math.random() * 0.1 - 0.05);
+        }
+        panner.pan.setValueAtTime(panVal, this.ctx.currentTime);
+        return panner;
+      }
+
+      // Deep, satisfying, lubricated mechanical switch "Thock"
+      keyThock(char) {
+        if (!this.enabled) return;
+        this.init();
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+
+        const panner = this.getPan(char);
+        const masterGain = this.ctx.createGain();
+        masterGain.gain.setValueAtTime(0.35, now);
+
+        if (panner) {
+          masterGain.connect(panner);
+          panner.connect(this.ctx.destination);
+        } else {
+          masterGain.connect(this.ctx.destination);
+        }
+
+        // Layer 1: Bottom-out deep woody resonance (The "Thock" body)
+        const isSpace = char === ' ';
+        const baseFreq = isSpace ? 140 : (220 + Math.random() * 45);
+        const osc = this.ctx.createOscillator();
+        const oscGain = this.ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(baseFreq * 1.5, now);
+        osc.frequency.exponentialRampToValueAtTime(baseFreq * 0.65, now + 0.035);
+
+        oscGain.gain.setValueAtTime(isSpace ? 0.8 : 0.65, now);
+        oscGain.gain.exponentialRampToValueAtTime(0.001, now + (isSpace ? 0.055 : 0.042));
+        osc.connect(oscGain);
+        oscGain.connect(masterGain);
+        osc.start(now);
+        osc.stop(now + 0.06);
+
+        // Layer 2: Delicate keycap tick (Crisp high-end tactile transient)
+        const bufferSize = Math.floor(this.ctx.sampleRate * 0.008);
+        const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) {
+          data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (bufferSize * 0.22));
+        }
+        const noise = this.ctx.createBufferSource();
+        noise.buffer = buffer;
+
+        const filter = this.ctx.createBiquadFilter();
+        filter.type = 'bandpass';
+        filter.frequency.setValueAtTime(2600 + Math.random() * 500, now);
+        filter.Q.setValueAtTime(3.2, now);
+
+        const noiseGain = this.ctx.createGain();
+        noiseGain.gain.setValueAtTime(0.24, now);
+        noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 0.008);
+
+        noise.connect(filter);
+        filter.connect(noiseGain);
+        noiseGain.connect(masterGain);
+        noise.start(now);
+      }
+
+      // Satisfying damped backspace tap
+      backspace() {
+        if (!this.enabled) return;
+        this.init();
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(280 + Math.random() * 30, now);
+        osc.frequency.exponentialRampToValueAtTime(110, now + 0.035);
+
+        gain.gain.setValueAtTime(0.38, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.04);
+
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.045);
+      }
+
+      // ASMR water droplet / marble pop
+      bubblePop() {
+        if (!this.enabled) return;
+        this.init();
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(560, now);
+        osc.frequency.exponentialRampToValueAtTime(1180, now + 0.048);
+
+        gain.gain.setValueAtTime(0.32, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.055);
+
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.06);
+      }
+
+      // Crystal singing bowl chime chord
+      successChime() {
+        if (!this.enabled) return;
+        this.init();
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+
+        [1046.5, 1318.5, 1567.98].forEach((freq, i) => {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(freq, now + i * 0.09);
+
+          gain.gain.setValueAtTime(0, now);
+          gain.gain.setValueAtTime(0.16, now + i * 0.09);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.09 + 0.85);
+
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now + i * 0.09);
+          osc.stop(now + i * 0.09 + 0.9);
+        });
+      }
+
+      // Soft tactile UI click
+      uiClick() {
+        if (!this.enabled) return;
+        this.init();
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(1300, now);
+        osc.frequency.exponentialRampToValueAtTime(250, now + 0.015);
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.018);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.02);
+      }
+    }
+
+    const sfx = new ASMRSoundEngine();
+
+    // Unlock audio context on first user gesture (browser autoplay policy)
+    function unlockAudio() {
+      sfx.init();
+      if (sfx.ctx && sfx.ctx.state === 'suspended') {
+        sfx.ctx.resume();
+      }
+    }
+    const _unlockEvents = ['pointerdown', 'touchstart', 'click', 'keydown'];
+    function _onFirstGesture() {
+      unlockAudio();
+      _unlockEvents.forEach(e => window.removeEventListener(e, _onFirstGesture));
+    }
+    _unlockEvents.forEach(e => window.addEventListener(e, _onFirstGesture, { passive: true }));
+
+    // Sound Toggle Setup (Defaults to ON)
+    const soundToggle = document.getElementById('soundToggle');
+    const soundIcon = document.getElementById('soundIcon');
+    const soundLabel = document.getElementById('soundLabel');
+
+    soundToggle.addEventListener('click', (e) => {
+      e.stopPropagation();
+      // Clicking the toggle always unlocks audio context
+      unlockAudio();
+      sfx.enabled = !sfx.enabled;
+      if (sfx.enabled) {
+        soundToggle.classList.add('is-active');
+        soundIcon.textContent = '🔊';
+        soundLabel.textContent = 'Sound On';
+        sfx.keyThock(' ');
+      } else {
+        soundToggle.classList.remove('is-active');
+        soundIcon.textContent = '🔈';
+        soundLabel.textContent = 'Sound Off';
+      }
+    });
+
+    /* ==========================================================================
+       Editorial Headline Typing Experience
+       ========================================================================== */
+    const textEl = document.getElementById('typed-text');
+    const cursor = document.getElementById('cursor');
+
+    const script = [
+      { type: 'write', text: 'Hi I am Eugene. ' },
+      { type: 'wait', ms: 750 },
+      { type: 'delete', count: 1 },
+      { type: 'wait', ms: 500 },
+      { type: 'delete', count: 10 },
+      { type: 'wait', ms: 350 },
+      { type: 'write', text: "'m Eugene. " },
+      { type: 'wait', ms: 400 },
+      { type: 'chime' },
+      { type: 'wait', ms: 7000 },
+      { type: 'delete', count: 16 },
+      { type: 'wait', ms: 700 }
+    ];
+
+    let stepIndex = 0;
+    const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+    async function runEditorLoop() {
+      while (true) {
+        const step = script[stepIndex];
+        if (step.type === 'chime') {
+          sfx.successChime();
+        } else if (step.type === 'write') {
+          cursor.classList.add('typing');
+          for (const char of step.text) {
+            textEl.textContent += char;
+            sfx.keyThock(char);
+            await sleep(65 + Math.random() * 45);
+          }
+          cursor.classList.remove('typing');
+        } else if (step.type === 'delete') {
+          cursor.classList.add('typing');
+          for (let i = 0; i < step.count; i++) {
+            textEl.textContent = textEl.textContent.slice(0, -1);
+            sfx.backspace();
+            await sleep(35 + Math.random() * 25);
+          }
+          cursor.classList.remove('typing');
+        } else if (step.type === 'wait') {
+          await sleep(step.ms);
+        }
+        stepIndex = (stepIndex + 1) % script.length;
+      }
+    }
+    (() => {
+      const root = document.getElementById('guideCursor');
+      if (!root) return;
+
+
+
+      const tag = root.querySelector('.gc-tag');
+      const name = root.querySelector('.gc-name');
+      const clip = root.querySelector('.gc-clip');
+      const inner = root.querySelector('[data-gc-text]');
+      const measure = root.querySelector('[data-gc-measure]');
+      const caret = root.querySelector('.gc-caret');
+
+      const rand = (min, max) => min + Math.random() * (max - min);
+      const clamp = (v, min, max) => Math.min(Math.max(v, min), max);
+
+      const steps = [
+        {
+          target: () => document.querySelector('h1'),
+          at: 'below',
+          text: "Hi I'm Eugene! Welcome to my portfolio 👋"
+        },
+        {
+          point: () => ({
+            x: clamp(innerWidth * 0.5 + (innerWidth > 600 ? 70 : 10), 30, innerWidth - 120),
+            y: clamp(innerHeight * 0.65, 80, innerHeight - 80)
+          }),
+          text: "Still polishing the final version... ✌️"
+        }
+      ];
+
+      const goal = { x: 0, y: 0 };
+      const shown = { x: 0, y: 0, vx: 0, vy: 0 };
+      const SPRING = 190, DAMPING = 2 * Math.sqrt(SPRING) * 0.82;
+      const waiters = [];
+      let clock = 0, last = 0, running = false, move = null, rest = null;
+      let typing = false, tremor = 1;
+
+      function frame(now) {
+        if (!running) return;
+        const dt = Math.min(now - last, 50);
+        last = now;
+        clock += dt;
+
+        if (move) {
+          const p = Math.min((clock - move.t0) / move.dur, 1);
+          const u = Math.pow(p, move.skew);
+          const e = u * u * u * (u * (u * 6 - 15) + 10);
+          const to = move.to();
+          const side = 3 * (1 - e) * (1 - e) * e * move.b1 + 3 * (1 - e) * e * e * move.b2;
+          goal.x = move.from.x + (to.x - move.from.x) * e + move.nx * side;
+          goal.y = move.from.y + (to.y - move.from.y) * e + move.ny * side;
+          if (p === 1) { const { done } = move; rest = move.to; move = null; done(); }
+        } else if (rest) {
+          const to = rest();
+          goal.x = to.x; goal.y = to.y;
+        }
+
+        const hops = Math.ceil(dt / 12), h = dt / hops / 1000;
+        for (let i = 0; i < hops; i++) {
+          shown.vx += (SPRING * (goal.x - shown.x) - DAMPING * shown.vx) * h;
+          shown.vy += (SPRING * (goal.y - shown.y) - DAMPING * shown.vy) * h;
+          shown.x += shown.vx * h;
+          shown.y += shown.vy * h;
+        }
+
+        tremor += ((typing ? 0 : 1) - tremor) * Math.min(dt / 280, 1);
+        const x = shown.x + (Math.sin(clock / 830 + 1.3) * 1.5 + Math.sin(clock / 310 + 4.1) * 0.6) * tremor;
+        const y = shown.y + (Math.cos(clock / 1010 + 0.4) * 1.3 + Math.sin(clock / 370 + 2.2) * 0.55) * tremor;
+
+        root.style.transform = `translate3d(${x.toFixed(2)}px, ${y.toFixed(2)}px, 0)`;
+
+        for (let i = waiters.length - 1; i >= 0; i--) {
+          if (waiters[i].at <= clock) waiters.splice(i, 1)[0].done();
+        }
+
+        requestAnimationFrame(frame);
+      }
+
+      const tourSleep = (ms) => new Promise(done => waiters.push({ at: clock + ms, done }));
+
+      function glide(to, dur) {
+        return new Promise(done => {
+          const from = { x: goal.x, y: goal.y }, target = to();
+          const dx = target.x - from.x, dy = target.y - from.y, dist = Math.hypot(dx, dy) || 1;
+          const b1 = Math.min(dist * rand(0.08, 0.28), 64) * (Math.random() < 0.5 ? -1 : 1);
+          const b2 = Math.random() < 0.3 ? -b1 * rand(0.3, 0.8) : b1 * rand(0.4, 1.1);
+          move = { from, to, t0: clock, dur, skew: rand(0.72, 0.94), nx: -dy / dist, ny: dx / dist, b1, b2, done };
+        });
+      }
+
+      async function moveTo(to, opts = {}) {
+        const off = { x: rand(-2, 2), y: rand(-1, 1) };
+        const aim = () => { const t = to(); return { x: t.x + off.x, y: t.y + off.y }; };
+        const target = aim(), dx = target.x - goal.x, dy = target.y - goal.y, dist = Math.hypot(dx, dy) || 1;
+        const dur = (opts.dur || clamp(220 + Math.sqrt(dist) * 25, 340, 1000)) * rand(0.9, 1.15);
+        await glide(aim, dur);
+      }
+
+      function compose(text) {
+        const chars = Array.from(text).map(char => {
+          const span = document.createElement('span');
+          span.className = 'gc-ch';
+          span.textContent = char;
+          return span;
+        });
+        measure.replaceChildren(...chars);
+        const boxes = chars.map(span => ({
+          right: span.offsetLeft + span.offsetWidth,
+          top: span.offsetTop,
+          bottom: span.offsetTop + span.offsetHeight
+        }));
+        return { chars, boxes, width: Math.ceil(measure.getBoundingClientRect().width), height: measure.offsetHeight };
+      }
+
+      function place(point, layout, prefer) {
+        const w = Math.max(name.offsetWidth, layout.width) + 22, h = name.offsetHeight + layout.height + 10;
+        const fitsBelow = point.y + 19 + h + 10 <= innerHeight, fitsAbove = point.y - h - 10 >= 0;
+        root.classList.toggle('is-up', fitsAbove && (prefer === 'above' || !fitsBelow));
+        root.classList.toggle('is-left', point.x + 16 + w + 10 > innerWidth);
+      }
+
+      async function typeBubble(layout) {
+        inner.style.width = layout.width + 'px';
+        inner.replaceChildren(...layout.chars, caret);
+        tag.classList.add('is-talking', 'is-typing');
+        typing = true;
+        sfx.bubblePop();
+        let width = 0;
+        for (let i = 0; i < layout.chars.length; i++) {
+          const box = layout.boxes[i], char = layout.chars[i].textContent;
+          layout.chars[i].classList.add('is-on');
+          width = Math.max(width, box.right);
+          clip.style.width = Math.ceil(width) + 2 + 'px';
+          clip.style.height = box.bottom + 'px';
+          caret.style.transform = `translate(${box.right}px, ${box.top}px)`;
+          sfx.keyThock(char);
+          let wait = rand(10, 24);
+          if (/[.!?]/.test(char)) wait = rand(90, 160);
+          else if (/[,:]/.test(char)) wait = rand(50, 100);
+          await tourSleep(wait);
+        }
+        typing = false;
+        tag.classList.remove('is-typing');
+      }
+
+      function hush() {
+        clip.style.width = clip.style.height = '0px';
+        tag.classList.remove('is-talking', 'is-typing');
+      }
+
+      async function say(step) {
+        let pointFn;
+        if (step.target) {
+          const el = step.target();
+          pointFn = () => {
+            const r = el.getBoundingClientRect();
+            const isNarrow = innerWidth < 600;
+            if (step.at === 'above') return { x: r.left + r.width * (isNarrow ? 0.3 : 0.4), y: r.top - 20 };
+            return { x: clamp(r.left + r.width * (isNarrow ? 0.6 : 0.75), 20, innerWidth - 60), y: r.bottom + 8 };
+          };
+        } else {
+          pointFn = step.point;
+        }
+
+        const layout = compose(step.text);
+        hush();
+        place(pointFn(), layout, step.at);
+        await moveTo(pointFn);
+        await tourSleep(rand(100, 200));
+        await typeBubble(layout);
+        await tourSleep(2200 + layout.chars.length * 15);
+      }
+
+      async function run() {
+        while (true) {
+          await tourSleep(600);
+          root.classList.add('is-here');
+          for (const step of steps) await say(step);
+
+          hush();
+          await tourSleep(600);
+          const exit = { x: innerWidth + 100, y: innerHeight * 0.4 };
+          await moveTo(() => exit, { dur: 600 });
+          root.classList.remove('is-here');
+          await tourSleep(2000);
+
+          // Reset position for re-entry
+          goal.x = shown.x = innerWidth + 50;
+          goal.y = shown.y = innerHeight * 0.45;
+          shown.vx = shown.vy = 0;
+          root.classList.remove('is-up', 'is-left');
+          root.style.transform = `translate3d(${goal.x}px, ${goal.y}px, 0)`;
+        }
+      }
+
+      function start() {
+        if (running) return;
+        running = true;
+        move = rest = null;
+        goal.x = shown.x = innerWidth + 50;
+        goal.y = shown.y = innerHeight * 0.45;
+        shown.vx = shown.vy = 0;
+        root.classList.remove('is-up', 'is-left');
+        root.style.transform = `translate3d(${goal.x}px, ${goal.y}px, 0)`;
+        requestAnimationFrame(now => { last = now; frame(now); });
+        run();
+      }
+
+      window.addEventListener('load', () => {
+        setTimeout(start, 800);
+      });
+    })();
+
+    // DOM is already ready (script is at end of <body>), start loop directly
+    setTimeout(runEditorLoop, 300);
+  </script>
+</body>
+</html>
